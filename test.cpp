@@ -1,104 +1,81 @@
 #include <iostream>
 using namespace std;
 
-template <class type>
-struct bst {
-    struct node {
-        int data;
-        node* left;
-        node* right;
-    };
-    node* root;
-    bst() {
-        root = nullptr;
+template<class type>
+struct heap {
+    type a[1000];
+    int n;
+    heap() {
+        n = 0;
     }
-    void insert(int x) {
-        if (root == nullptr) {
-            root = new node;
-            root->data = x;
-            root->left = nullptr;
-            root->right = nullptr;
-        }
-        else {
-            node* cur = root;
-            node* parent = nullptr;
-            while (cur != nullptr) {
-                parent = cur;
-                if (x < cur->data) {
-                    cur = cur->left;
-                }
-                else {
-                    cur = cur->right;
-                }
-            }
-            if (x < parent->data) {
-                parent->left = new node;
-                parent->left->data = x;
-                parent->left->left = nullptr;
-                parent->left->right = nullptr;
-            }
-            else {
-                parent->right = new node;
-                parent->right->data = x;
-                parent->right->left = nullptr;
-                parent->right->right = nullptr;
-            }
+
+    void _up(int i) {
+        while (i > 0 && a[i] > a[(i - 1) / 2]) {
+            swap(a[i], a[(i - 1) / 2]);
+            i = (i - 1) / 2;
         }
     }
 
-    bool find(int x) {
-        return hha(root, x);
+    void _down(int i) {
+        int ma = i;
+        int l = 2 * i + 1;
+        int r = 2 * i + 2;
+
+        if (l < n && a[l] > a[ma])
+            ma = l;
+
+        if (r < n && a[r] > a[ma])
+            ma = r;
+
+        if (ma != i) {
+            swap(a[i], a[ma]);
+            _down(ma);
+        }
     }
 
-    bool hha(node* root, int x) {
-        if (root == nullptr) {
-            return false;
-        }
-        if (root->data == x) {
-            return true;
-        }
-        if (x < root->data) {
-            return hha(root->left, x);
-        } else {
-            return hha(root->right, x);
-        }
+    void push(type x) {
+        a[n++] = x;
+        _up(n - 1);
     }
 
-    void print() {
-        hhe(root);
+    void pop() {
+        if (n == 0) return;
+        swap(a[0], a[--n]);
+        _down(0);
     }
-    void hhe (node *root){
-        if(root != nullptr) {
-            hhe(root -> left);
-            cout << root-> data << " ";
-            hhe(root -> right);
-        }
+
+    void update(int i, type x) {
+        a[i] = x;
+        _up(i);
+        _down(i);
+    }
+
+    type top() {
+        return a[0];
+    }
+
+    int size() {
+        return n;
+    }
+
+    bool empty() {
+        return n == 0;
     }
 };
 
 int main() {
-    bst<int> tree;
-    tree.insert(5);
-    tree.insert(30);
-    tree.insert(777);
-    tree.insert(20);
-    tree.insert(489);
-    tree.insert(4);
-    tree.insert(60);
-    tree.insert(8);
-    tree.insert(2);
-    tree.insert(1);
+    heap<int> hp;
+    hp.push(10);
+    hp.push(0);
+    hp.push(20);
+    hp.push(3);
+    hp.push(7);
+    hp.update(2, 69);
 
-    tree.print();
+    while (!hp.empty()) {
+        cout << hp.top() << ' ';
+        hp.pop();
+    }
     cout << endl;
-    
-    if(tree.find(50)){
-        cout << "1" << endl;
-    }
-    else{
-        cout << "0" << endl;
-    }
-    
     return 0;
 }
-
