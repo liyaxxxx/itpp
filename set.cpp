@@ -28,47 +28,83 @@ struct BST {
         }
         node *curr = root;
         while (true) {
-            if (curr -> value >= x) {
-                if (curr -> left == nullptr) {
-                    curr -> left = new node(x);
+            if (curr->value >= x) {
+                if (curr->left == nullptr) {
+                    curr->left = new node(x);
                     break;
                 }
-                curr = curr -> left;
-            } else { 
-                if (curr -> right == nullptr) {
-                    curr -> right = new node(x);
+                curr = curr->left;
+            } else {
+                if (curr->right == nullptr) {
+                    curr->right = new node(x);
                     break;
                 }
-                curr = curr -> right;
+                curr = curr->right;
             }
         }
-    }
-    
-    void erase(type x) {
-        root = eraseHelper(root, x);
     }
 
-    node* eraseHelper(node* root, type x) {
-        if (root == nullptr) return root;
-        if (x < root->value) {
-            root->left = eraseHelper(root->left, x);
-        } else if (x > root->value) {
-            root->right = eraseHelper(root->right, x);
-        } else {
-            if (root->left == nullptr) {
-                node* temp = root->right;
-                delete root;
-                return temp;
-            } else if (root->right == nullptr) {
-                node* temp = root->left;
-                delete root;
-                return temp;
+    void erase(type x){
+        pair <node*, node*> tmp = find_with_parent(root, x);
+        if (tmp.second == nullptr) return;
+        sz--;
+        if (tmp.second->right == nullptr) {
+            if(tmp.first->left == tmp.second) {
+                tmp.first->left = tmp.second->left;
             }
-            node* temp = minValueNode(root->right);
-            root->value = temp->value;
-            root->right = eraseHelper(root->right, temp->value);
+            else {
+                tmp.first->right = tmp.second->left;
+            }
+            delete tmp.second;
+            return;
         }
-        return root;
+
+        pair <node*, node*> rl = find_lowest_node(tmp.second->right, tmp.second);
+        tmp.second->value = rl.second->value;
+        tmp = rl;
+        if (tmp.second->right == nullptr) {
+            if (tmp.first->left == tmp.second) {
+                tmp.first->left = nullptr;
+            }
+            else {
+                tmp.first->right = nullptr;
+            }
+            delete tmp.second;
+            return;
+        }
+
+        if (tmp.first->left == tmp.second) {
+            tmp.first->left = tmp.second->right;
+        }
+        else {
+            tmp.first->right = tmp.second->right;
+        }
+        delete tmp.second;
+        return;    
+    }
+
+    pair<node*, node*> find_with_parent(node* root, type x) {
+        node* parent = nullptr;
+        node* current = root;
+        while (current != nullptr && current->value != x) {
+            parent = current;
+            if (x < current->value) {
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+        }
+        return {parent, current};
+    }
+
+    pair<node*, node*> find_lowest_node(node* root, node* parent) {
+        node* current = root;
+        node* prev = nullptr;
+        while (current->left != nullptr) {
+            prev = current;
+            current = current->left;
+        }
+        return {prev, current};
     }
 
     node* minValueNode(node* root) {
@@ -82,12 +118,12 @@ struct BST {
     bool find(type x) {
         node *cur = root;
         while (cur != nullptr) {
-            if (cur -> value == x) {
+            if (cur->value == x) {
                 return true;
-            } else if (x > cur -> value) {
-                cur = cur -> right;
+            } else if (x > cur->value) {
+                cur = cur->right;
             } else {
-                cur = cur -> left;
+                cur = cur->left;
             }
         }
         return false;
@@ -98,15 +134,15 @@ struct BST {
     }
 
     void print() {
-        printInOrder(root);
+        hhaprint(root);
         cout << endl;
     }
 
-    void printInOrder(node* root) {
+    void hhaprint(node* root) {
         if (root != nullptr) {
-            printInOrder(root->left);
+            hhaprint(root->left);
             cout << root->value << " ";
-            printInOrder(root->right);
+            hhaprint(root->right);
         }
     }
 };
@@ -123,16 +159,9 @@ int main() {
     bst.insert(6);
     bst.insert(40);
     bst.insert(35);
-    
-    cout << "Before erase: ";
     bst.print();
     bst.erase(5);
-    cout << "After erase 5: ";
     bst.print();
-    
-    cout << "Find 5: " << bst.find(5) << endl;
-    
-    cout << "Size of BST: " << bst.size() << endl;
     
     return 0;
 }
